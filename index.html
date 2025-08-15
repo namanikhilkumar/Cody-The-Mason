@@ -67,10 +67,16 @@ h1 {
 </div>
 <div id="message">🎉 Wall Done! Master Builder! 🎉</div>
 
+<!-- Sound effects -->
+<audio id="brickSound" src="https://www.soundjay.com/mechanical/sounds/brick-thud-1.mp3"></audio>
+<audio id="finishSound" src="https://www.soundjay.com/human/sounds/applause-8.mp3"></audio>
+
 <script>
 const gameArea = document.getElementById('gameArea');
 const message = document.getElementById('message');
 const stucco = document.getElementById('stucco');
+const brickSound = document.getElementById('brickSound');
+const finishSound = document.getElementById('finishSound');
 
 const rows = 5;
 const cols = 6;
@@ -124,13 +130,20 @@ for (let i = 0; i < rows * cols; i++) {
       brick.style.top = pos.top + 'px';
       brick.style.cursor = 'default';
       brick.onmousedown = null;
+
+      // Play brick sound
+      brickSound.currentTime = 0;
+      brickSound.play();
+
       placedBricks++;
 
       // Check if all bricks placed
       if (placedBricks === rows * cols) {
         // Animate stucco covering the wall
         stucco.style.width = "100%";
+        // Play finish sound after stucco animation
         setTimeout(() => {
+          finishSound.play();
           message.style.display = 'block';
         }, 1000);
       }
