@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brick & Mortar Master</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f2f2f2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  padding: 20px;
+}
+h1 {
+  color: #333;
+}
+#gameArea {
+  position: relative;
+  width: 420px;
+  height: 400px;
+  border: 2px solid #555;
+  background: #e0e0e0;
+  margin-top: 20px;
+  overflow: hidden;
+}
+.brick {
+  width: 60px;
+  height: 30px;
+  background: #b22222;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  position: absolute;
+  user-select: none;
+  border-radius: 4px;
+  transition: top 0.2s, left 0.2s;
+}
+#stucco {
+  position: absolute;
+  top: 50px;
+  left: 0;
+  width: 0%;
+  height: 250px;
+  background: #d2b48c;
+  z-index: 10;
+  transition: width 1s;
+}
+#message {
+  margin-top: 20px;
+  font-size: 24px;
+  color: green;
+  display: none;
+}
+</style>
+</head>
+<body>
+<h1>Brick & Mortar Master</h1>
+<p>Drag bricks to build the wall. Complete all rows to finish!</p>
+
+<div id="gameArea">
+  <div id="stucco"></div>
+</div>
+<div id="message">🎉 Wall Done! Master Builder! 🎉</div>
+
+<script>
+const gameArea = document.getElementById('gameArea');
+const message = document.getElementById('message');
+const stucco = document.getElementById('stucco');
+
+const rows = 5;
+const cols = 6;
+const brickWidth = 60;
+const brickHeight = 30;
+let placedBricks = 0;
+
+// Function to calculate brick position in staggered wall
+function getSnapPosition(x, y) {
+  let row = Math.floor((y - 50) / brickHeight);
+  let col = Math.floor(x / brickWidth);
+  if (row < 0) row = 0;
+  if (row >= rows) row = rows - 1;
+  if (row % 2 === 1) col += 0.5; // stagger odd rows
+  if (col < 0) col = 0;
+  if (col >= cols) col = cols - 1;
+  return { left: col * brickWidth, top: row * brickHeight + 50 };
+}
+
+// Create draggable bricks
+for (let i = 0; i < rows * cols; i++) {
+  const brick = document.createElement('div');
+  brick.classList.add('brick');
+  brick.textContent = i + 1;
+  brick.style.top = `${10 + i * 5}px`;
+  brick.style.left = `${10 + (i % cols) * 65}px`;
+  gameArea.appendChild(brick);
+
+  brick.onmousedown = dragMouseDown;
+
+  function dragMouseDown(e) {
+    e.preventDefault();
+    let offsetX = e.clientX - brick.offsetLeft;
+    let offsetY = e.clientY - brick.offsetTop;
+
+    document.onmousemove = moveMouse;
+    document.onmouseup = dropMouse;
+
+    function moveMouse(e) {
+      brick.style.left = e.clientX - offsetX + "px";
+      brick.style.top = e.clientY - offsetY + "px";
+    }
+
+    function dropMouse() {
+      document.onmousemove = null;
+      document.onmouseup = null;
+
+      // Snap brick
+      const pos = getSnapPosition(brick.offsetLeft, brick.offsetTop);
+      brick.style.left = pos.left + 'px';
+      brick.style.top = pos.top + 'px';
+      brick.style.cursor = 'default';
+      brick.onmousedown = null;
+      placedBricks++;
+
+      // Check if all bricks placed
+      if (placedBricks === rows * cols) {
+        // Animate stucco covering the wall
+        stucco.style.width = "100%";
+        setTimeout(() => {
+          message.style.display = 'block';
+        }, 1000);
+      }
+    }
+  }
+}
+</script>
+</body>
+</html>
